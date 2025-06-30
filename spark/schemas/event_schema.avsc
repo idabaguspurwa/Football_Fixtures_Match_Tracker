@@ -1,0 +1,13 @@
+{
+  "namespace": "com.example.football",
+  "type": "record",
+  "name": "MatchEvent",
+  "fields": [
+    {"name": "fixture_id", "type": "int"},
+    {"name": "event_time", "type": "int"},
+    {"name": "team_name", "type": "string"},
+    {"name": "player_name", "type": ["null", "string"], "default": null},
+    {"name": "event_type", "type": "string"},
+    {"name": "detail", "type": "string"}
+  ]
+}

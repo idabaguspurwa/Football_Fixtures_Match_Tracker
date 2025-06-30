@@ -1,0 +1,8 @@
+[
+  {"name": "fixture_id", "type": "INTEGER", "mode": "NULLABLE"},
+  {"name": "event_time", "type": "INTEGER", "mode": "NULLABLE"},
+  {"name": "team_name", "type": "STRING", "mode": "NULLABLE"},
+  {"name": "player_name", "type": "STRING", "mode": "NULLABLE"},
+  {"name": "event_type", "type": "STRING", "mode": "NULLABLE"},
+  {"name": "detail", "type": "STRING", "mode": "NULLABLE"}
+]
