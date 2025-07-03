@@ -1,4 +1,3 @@
-# spark/match_processor.py
 import sys
 import json
 from pyspark.sql import SparkSession
@@ -6,33 +5,41 @@ from pyspark.sql.functions import from_json, col, udf
 from pyspark.sql.types import StructType, StructField, StringType, IntegerType
 from fastavro import schemaless_reader
 from io import BytesIO
+from pyspark import SparkFiles
 
-def deserialize_avro(message):
+def deserialize_avro(message, schema):
     try:
-        # Open the schema file made available by Spark's --files option.
-        with open('event_schema.avsc', 'r') as f:
-            schema = json.load(f)
-        
-        bytes_io = BytesIO(message)
+        # Skips the 5-byte Confluent header
+        bytes_io = BytesIO(message[5:])
         decoded_data = schemaless_reader(bytes_io, schema)
+        
+        if 'player_name' not in decoded_data:
+            decoded_data['player_name'] = None
+            
         return json.dumps(decoded_data)
-    except Exception:
+    except Exception as e:
+        print(f"ERROR: Could not decode Avro message. Error: {e}")
         return None
 
-def main(kafka_bootstrap_servers, gcs_checkpoint_location, bq_table):
+def main(kafka_bootstrap_servers, gcs_checkpoint_location, bq_table, schema_gcs_path):
     spark = SparkSession.builder \
-        .appName("FootballMatchProcessor") \
+        .appName("FootballMatchProcessor-Final-Robust") \
         .getOrCreate()
     
     spark.sparkContext.setLogLevel("WARN")
 
-    deserialize_udf = udf(deserialize_avro, StringType())
+    spark.sparkContext.addFile(schema_gcs_path)
+    
+    # Read and parse the schema ONCE on the driver.
+    with open(SparkFiles.get("event_schema.avsc"), "r") as f:
+        parsed_schema = json.load(f)
+
+    deserialize_udf = udf(lambda msg: deserialize_avro(msg, parsed_schema), StringType())
 
     kafka_df = spark.readStream \
         .format("kafka") \
         .option("kafka.bootstrap.servers", kafka_bootstrap_servers) \
         .option("subscribe", "match_events") \
-        .option("startingOffsets", "latest") \
         .load()
 
     decoded_df = kafka_df.withColumn("decoded_value", deserialize_udf(col("value")))
@@ -61,11 +68,9 @@ def main(kafka_bootstrap_servers, gcs_checkpoint_location, bq_table):
         .awaitTermination()
 
 if __name__ == "__main__":
-    if len(sys.argv) != 4:
-        print("Usage: spark-submit match_processor.py <kafka_bootstrap_servers> <gcs_checkpoint_location> <bq_table>", file=sys.stderr)
+    if len(sys.argv) != 5:
+        print("Usage: spark-submit ... <kafka_servers> <gcs_checkpoint> <bq_table> <schema_gcs_path>", file=sys.stderr)
         sys.exit(-1)
     
-    kafka_servers = sys.argv[1]
-    gcs_checkpoint = sys.argv[2]
-    bq_table_name = sys.argv[3]
-    main(kafka_servers, gcs_checkpoint, bq_table_name)
+    kafka_servers, gcs_checkpoint, bq_table_name, schema_path = sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4]
+    main(kafka_servers, gcs_checkpoint, bq_table_name, schema_path)

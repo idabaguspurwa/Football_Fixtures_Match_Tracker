@@ -7,6 +7,7 @@ This project demonstrates a complete, end-to-end data engineering pipeline built
 ## Table of Contents
 
 - [Project Overview](#project-overview)
+- [Live Dashboard](#live-dashboard)
 - [Architecture](#architecture)
 - [Technology Stack](#technology-stack)
 - [Project Structure](#project-structure)
@@ -30,6 +31,30 @@ The goal of this project is to showcase a modern data engineering workflow. The 
 4. **Stores** the cleaned, structured data in Google BigQuery, a serverless data warehouse.
 5. **Orchestrates** the Spark processing job using Apache Airflow (Cloud Composer) for scheduling and monitoring.
 6. **Visualizes** the live match statistics on a Looker Studio dashboard.
+
+## Live Dashboard
+
+🎯 **[View Live Dashboard](https://lookerstudio.google.com/reporting/6cef80f3-5906-46e0-b23d-94f1494c8979)**
+
+The project features a comprehensive real-time dashboard built with Google Looker Studio that visualizes the streaming football match data. The dashboard provides:
+
+### Dashboard Components:
+- **⚽ Goal Counter**: Real-time tracking of goals scored across all matches
+- **📊 Live Score**: Current match scores and live updates
+- **🎯 Live Football Match Dashboard**: Central hub showing active match data
+- **🏆 Top Scorers**: Leaderboard of highest goal scorers
+- **🟨🟥 Cards Issued**: Tracking of yellow and red cards given to players
+
+### Key Metrics Displayed:
+- ⚽ **Goals**: Real-time goal count and scoring events
+- 📈 **Live Scores**: Current match results and ongoing game status
+- � **Top Scorers**: Player rankings based on goals scored
+- 🟨 **Yellow Cards**: Disciplinary actions and player bookings
+- 🟥 **Red Cards**: Player ejections and serious infractions
+
+The dashboard directly connects to the BigQuery `live_match_events` table, ensuring that all visualizations reflect the most current data flowing through the streaming pipeline.
+
+> **Note**: The dashboard is publicly accessible and showcases real-time data processing capabilities of the entire pipeline architecture.
 
 ## Architecture
 
@@ -186,6 +211,8 @@ graph TD
 2. Create a new Data Source and connect it to your `footballfixtures.football_dataset.live_match_events` BigQuery table.
 3. Create a new report and build charts (Tables, Scorecards, Bar Charts) to visualize the incoming data.
 4. Set the report's data freshness to auto-refresh every 5 or 15 minutes.
+
+**🎯 Live Dashboard Example**: Check out the [completed dashboard](https://lookerstudio.google.com/reporting/6cef80f3-5906-46e0-b23d-94f1494c8979) that showcases real-time football match data visualization.
 
 ## Future Improvements
 
