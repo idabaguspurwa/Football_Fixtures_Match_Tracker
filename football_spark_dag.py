@@ -17,7 +17,7 @@ KAFKA_IP = "35.247.177.245" # Your Kafka VM IP
 
 # Define the PySpark job details
 PYSPARK_JOB = {
-    "reference": {"job_id": "football_streaming_job_{{ ds_nodash }}"},
+    "reference": {"job_id": "football_streaming_job_{{ ds_nodash }}_{{ task_instance.try_number }}"},
     "placement": {"cluster_name": CLUSTER_NAME},
     "pyspark_job": {
         "main_python_file_uri": f"gs://{BUCKET_NAME}/match_processor.py",
